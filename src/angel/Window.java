@@ -6,6 +6,8 @@
 package angel;
 
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  *
@@ -19,13 +21,23 @@ public class Window extends javax.swing.JFrame {
     public Window() {
         initComponents();
         
-        for(int i=0;i<9;i++){
+        for(int i=0;i<144;i++){
             Box b = new Box();
             b.setPreferredSize(new Dimension(50, 50));
+
+            b.addMouseListener(new MouseAdapter() {
+            @Override
+                public void mouseClicked(MouseEvent me) {
+                    super.mouseClicked(me);
+
+                }
+            });
             add(b);
+
         }
         pack();
     }
+    
 
 
     /**
@@ -38,7 +50,7 @@ public class Window extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setLayout(new java.awt.GridLayout(3, 3));
+        getContentPane().setLayout(new java.awt.GridLayout(12, 12));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
