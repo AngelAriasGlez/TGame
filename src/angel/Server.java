@@ -7,7 +7,6 @@ package angel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
@@ -18,11 +17,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
-    private int mMaxPlayers;
-    private Protocol mProtocol;
-    public Server(int maxPlayers, Protocol protocol){
+    private final int mMaxPlayers;
+    private final Game mGame;
+    private final ServerProtocol mProtocol;
+    public Server(int maxPlayers, Game game){
         mMaxPlayers = maxPlayers;
-        mProtocol = protocol;
+        mGame = game;
+        mProtocol = new ServerProtocol(mGame);
     }
 
     public void start() {
@@ -37,7 +38,7 @@ public class Server {
                     System.out.println("Waiting for clients to connect...");
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
-                        PlayerTask pt = new PlayerTask(clientSocket, mProtocol);
+                        ServerPlayerTask pt = new ServerPlayerTask(clientSocket, mProtocol);
                         clientProcessingPool.submit(pt);
                     }
                 } catch (IOException e) {
@@ -47,35 +48,57 @@ public class Server {
         };
         Thread serverThread = new Thread(serverTask);
         serverThread.start();
-
     }
 
-    private class PlayerTask implements Runnable {
+    public class ServerPlayerTask implements Runnable {
         private final Socket mClientSocket;
-        private Protocol mProtocol;
+        private final ServerProtocol mProtocol;
+        
+        Player mPlayer;
+        
+        BufferedReader mIn;
+        OutputStream mOut;
 
-        private PlayerTask(Socket clientSocket, Protocol protocol) {
+        private ServerPlayerTask(Socket clientSocket, ServerProtocol protocol) {
             mClientSocket = clientSocket;
             mProtocol = protocol;
+            
+            mPlayer = new Player(mClientSocket.getInetAddress());
+            mGame.join(mPlayer);
+            
+            try {
+                mIn = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()), 2048);
+                mOut = mClientSocket.getOutputStream();
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        public void send(String out){
+            try {
+                mOut.write(out.getBytes());
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         @Override
         public void run() {
             System.out.println("Got a client !");
 
+            
+            if(mPlayer != null && mIn != null && mOut != null){
+            
+            
             try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()), 2048);
-                OutputStream out = mClientSocket.getOutputStream();
                 while(!mClientSocket.isClosed()){
-                   String result = mProtocol.process(in.readLine(), mClientSocket.getInetAddress());
-                   if(result != null){
-                        out.write(result.getBytes());
-                        out.
-                    }
-                    
+                   mProtocol.process(mIn.readLine(), mPlayer, this);
                 }
+            
+            
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             }
 
             try {

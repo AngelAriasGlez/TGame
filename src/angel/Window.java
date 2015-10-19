@@ -5,11 +5,12 @@
  */
 package angel;
 
-import angel.Game.Player;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -24,7 +25,7 @@ public class Window extends javax.swing.JFrame {
      */
     public Window() {
         initComponents();
-        
+    
         
         getContentPane().setLayout(new java.awt.GridLayout(Game.LINE_ELEMENTS, Game.LINE_ELEMENTS));
         
@@ -38,14 +39,10 @@ public class Window extends javax.swing.JFrame {
                     public void mouseClicked(MouseEvent me) {
                         super.mouseClicked(me);
 
-                        Player player = mGame.getTurn();
+
                         Point point = b.getPosition();
-                        if(mGame.tryMove(point.x, point.y, player)){
-                            if(mGame.checkWin() != null){
-                                System.out.println("WIN");
-                            }
-                            b.setPlayer(player);
-                        }
+                        mGame.tryMove(point.x, point.y);
+
                     }
                 });
                 add(b);

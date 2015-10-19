@@ -7,6 +7,11 @@
 package angel;
 
 import java.awt.Point;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 interface GameListener {
     void onMove();
@@ -18,19 +23,26 @@ interface GameListener {
  */
 public class Game {
     Server mServer;
+    Client mClient;
+    ServerProtocol mProtocol;
     
-    public enum Player{
-        EMPTY, 
-        LOCAL, 
-        REMOTE_0,
-        REMOTE_1,
-        REMOTE_2
+    ArrayList<Player> mPlayers = new ArrayList();
 
-    }
     public enum Status{
         READY, WAITING
     }
-    private Player mPrevTurn = Player.REMOTE_0;
+
+    
+    public boolean join(Player player){
+        if(!mPlayers.contains(player)){
+            mPlayers.add(player);
+            return true;
+        }
+        return false;
+    }
+    
+    
+    private Player mPrevTurn = null;
     
     public static int LINE_ELEMENTS = 12;
     private Box mBoxes[][] = new Box[LINE_ELEMENTS][LINE_ELEMENTS];
@@ -41,22 +53,53 @@ public class Game {
                 mBoxes[x][y] = new Box(new Point(x, y));
             }
         }
-        mServer =  new Server();
-        mServer.start(4);
+        
+        mBoxes[0][0].setPlayer(new Player());
+        
+
+        
+        mServer =  new Server(4, this);
+        mServer.start();
+        
+        
+        mClient = new Client(this);
+        try {
+            mClient.connect("localhost");
+        } catch (IOException ex) {
+            Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
     }
+    
+    public void tryMove(int x, int y){
+        try {
+            mClient.move(x, y);
+        } catch (IOException ex) {
+            Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     public Box[][] getBoxes(){
         return mBoxes;
     }
     
-    public boolean tryMove(int x, int y, Player player){
-        if(getTurn() == player && mBoxes[x][y].getPlayer() == Player.EMPTY){
+    public boolean isMoveValid(int x, int y, Player player){
+        if(getCurrentTurn() == player && mBoxes[x][y].getPlayer() == null){
             mBoxes[x][y].setPlayer(player);
             mPrevTurn = player;
             return true;
         }
         return false;
     }
-    public Player checkWin(){
+    public Player checkForWin(){
         
         Player p = checkRow();
         if(p != null){
@@ -80,7 +123,7 @@ public class Game {
                 for(int i = 0; x+i < mBoxes.length-1; i++){
                     Player p0 = mBoxes[x+i][y].getPlayer();
                     Player p1 = mBoxes[x+i+1][y].getPlayer();
-                    if(p0 == p1 && p0 != Player.EMPTY){
+                    if(p0 == p1 && p0 != null){
                         if(i >= 2){
                             return mBoxes[x+i][y].getPlayer();
                         }
@@ -98,7 +141,7 @@ public class Game {
                 for(int i = 0; y+i < mBoxes[x].length-1; i++){
                     Player p0 = mBoxes[x][y+i].getPlayer();
                     Player p1 = mBoxes[x][y+i+1].getPlayer();
-                    if(p0 == p1 && p0 != Player.EMPTY){
+                    if(p0 == p1 && p0 != null){
                         if(i >= 2){
                             return mBoxes[x][y+i].getPlayer();
                         }
@@ -121,7 +164,7 @@ public class Game {
                     int y = mBoxes.length-(z-(c+l));
                     if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) continue;
                     if(p == null) p = mBoxes[x][y].getPlayer();
-                    if(p == mBoxes[x][y].getPlayer() && p != Player.EMPTY){
+                    if(p == mBoxes[x][y].getPlayer() && p != null){
                         p = mBoxes[x][y].getPlayer();
                         if(l >= 3){
                             return p;
@@ -142,7 +185,7 @@ public class Game {
                     int y = (z-(c+l));
                     if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) continue;
                     if(p == null) p = mBoxes[x][y].getPlayer();
-                    if(p == mBoxes[x][y].getPlayer() && p != Player.EMPTY){
+                    if(p == mBoxes[x][y].getPlayer() && p != null){
                         p = mBoxes[x][y].getPlayer();
                         if(l >= 3){
                             return p;
@@ -163,19 +206,13 @@ public class Game {
     } 
      
      
-    public Player getTurn(){
-
-        Player l[] = Player.values();
-        int i;
-        for(i=1;i<l.length;i++){
-            if(l[i] == mPrevTurn){
-                break;
-            }
-        }
-        i++;
-        if(i >= l.length) i = 1;
-        
-        return l[i];
+    public Player getCurrentTurn(){
+        if(mPlayers.size() <= 0) return null;
+        if(mPrevTurn == null) mPrevTurn = mPlayers.get(0);
+        int i = mPlayers.indexOf(mPrevTurn);
+        if(i >= mPlayers.size()) i = 0;
+        if(i < 0) return null;
+        return mPlayers.get(i);
     }
     
     

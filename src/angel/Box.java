@@ -6,7 +6,7 @@
 package angel;
 
 
-import angel.Game.Player;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -22,7 +22,7 @@ import javax.swing.JLabel;
  */
 public class Box extends JLabel{
 
-    private Player mPlayer = Player.EMPTY;
+    private Player mPlayer;
     private Point mPosition;
     
     public Box(Point p){
@@ -50,30 +50,33 @@ public class Box extends JLabel{
         g.setColor(Color.GRAY);
         g.drawRect(rect.x-1, rect.y, rect.width, rect.height);
         
-        int thick = 10;
-        g2.setStroke(new BasicStroke(10));
-        if(mPlayer == Player.REMOTE_0){
-            g.setColor(Color.GREEN);
-            g.drawArc(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2), 0, 180);
-            g.drawArc(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2), 180, 360);
-        }else if(mPlayer == Player.LOCAL){
-            g.setColor(Color.BLUE);
-            g.drawLine(rect.x + thick, rect.y + thick, rect.width - thick, rect.height - thick);
-            g.drawLine(rect.width - thick, rect.y + thick, rect.x + thick, rect.height - thick);
-        }else if(mPlayer == Player.REMOTE_1){
-            g.setColor(Color.BLACK);
-            g.drawRect(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2));
-        }else if(mPlayer == Player.REMOTE_2){
-            g.setColor(Color.MAGENTA);
-            //g.drawRect(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2));
-            g2.setStroke(new BasicStroke(8));
-            Polygon p = new Polygon();
-            p.addPoint(rect.x + thick + (int)((float)thick * 0.1f), rect.height - thick - (int)((float)thick * 0.2f));
-            p.addPoint((rect.width / 2), rect.y + (int)((float)thick * 1.4f));
-            p.addPoint(rect.width - thick - (int)((float)thick * 0.1f), rect.height - thick - (int)((float)thick * 0.2f));
-            
-            g.drawPolygon(p);
+        if(mPlayer != null){
+        
+            int thick = 10;
+            g2.setStroke(new BasicStroke(10));
+            if(mPlayer.getId() == 0){
+                g.setColor(Color.GREEN);
+                g.drawArc(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2), 0, 180);
+                g.drawArc(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2), 180, 360);
+            }else if(mPlayer.getId() == 1){
+                g.setColor(Color.BLUE);
+                g.drawLine(rect.x + thick, rect.y + thick, rect.width - thick, rect.height - thick);
+                g.drawLine(rect.width - thick, rect.y + thick, rect.x + thick, rect.height - thick);
+            }else if(mPlayer.getId() == 2){
+                g.setColor(Color.BLACK);
+                g.drawRect(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2));
+            }else if(mPlayer.getId() == 3){
+                g.setColor(Color.MAGENTA);
+                //g.drawRect(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2));
+                g2.setStroke(new BasicStroke(8));
+                Polygon p = new Polygon();
+                p.addPoint(rect.x + thick + (int)((float)thick * 0.1f), rect.height - thick - (int)((float)thick * 0.2f));
+                p.addPoint((rect.width / 2), rect.y + (int)((float)thick * 1.4f));
+                p.addPoint(rect.width - thick - (int)((float)thick * 0.1f), rect.height - thick - (int)((float)thick * 0.2f));
 
+                g.drawPolygon(p);
+
+            }
         }
         /*Polygon shape3 = new Polygon();
         shape3.addPoint(rect.x, rect.y + rect.height - 1);
