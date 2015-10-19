@@ -5,7 +5,9 @@
  */
 package angel;
 
+import angel.Game.Player;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,25 +17,39 @@ import java.awt.event.MouseEvent;
  */
 public class Window extends javax.swing.JFrame {
 
+    private Game mGame = new Game();
+    
     /**
      * Creates new form Window
      */
     public Window() {
         initComponents();
         
-        for(int i=0;i<144;i++){
-            Box b = new Box();
-            b.setPreferredSize(new Dimension(50, 50));
+        
+        getContentPane().setLayout(new java.awt.GridLayout(Game.LINE_ELEMENTS, Game.LINE_ELEMENTS));
+        
+        Box boxes[][] = mGame.getBoxes();
+        for(int x=0;x<boxes.length;x++){
+            for (Box[] boxe : boxes) {
+                final Box b = boxe[x];
+                b.setPreferredSize(new Dimension(50, 50));
+                b.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent me) {
+                        super.mouseClicked(me);
 
-            b.addMouseListener(new MouseAdapter() {
-            @Override
-                public void mouseClicked(MouseEvent me) {
-                    super.mouseClicked(me);
-
-                }
-            });
-            add(b);
-
+                        Player player = mGame.getTurn();
+                        Point point = b.getPosition();
+                        if(mGame.tryMove(point.x, point.y, player)){
+                            if(mGame.checkWin() != null){
+                                System.out.println("WIN");
+                            }
+                            b.setPlayer(player);
+                        }
+                    }
+                });
+                add(b);
+            }
         }
         pack();
     }
@@ -50,7 +66,7 @@ public class Window extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setLayout(new java.awt.GridLayout(12, 12));
+        getContentPane().setLayout(null);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
