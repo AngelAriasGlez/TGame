@@ -5,8 +5,11 @@
  */
 package angel;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -15,13 +18,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
-
-    public static void main(String[] args) {
-        new Server().startServer();
+    private int mMaxPlayers;
+    private Protocol mProtocol;
+    public Server(int maxPlayers, Protocol protocol){
+        mMaxPlayers = maxPlayers;
+        mProtocol = protocol;
     }
 
-    public void startServer() {
-        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
+    public void start() {
+        
+        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(mMaxPlayers);
 
         Runnable serverTask = new Runnable() {
             @Override
@@ -31,7 +37,8 @@ public class Server {
                     System.out.println("Waiting for clients to connect...");
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
-                        clientProcessingPool.submit(new ClientTask(clientSocket));
+                        PlayerTask pt = new PlayerTask(clientSocket, mProtocol);
+                        clientProcessingPool.submit(pt);
                     }
                 } catch (IOException e) {
                     System.err.println("Unable to process client request");
@@ -43,11 +50,13 @@ public class Server {
 
     }
 
-    private class ClientTask implements Runnable {
-        private final Socket clientSocket;
+    private class PlayerTask implements Runnable {
+        private final Socket mClientSocket;
+        private Protocol mProtocol;
 
-        private ClientTask(Socket clientSocket) {
-            this.clientSocket = clientSocket;
+        private PlayerTask(Socket clientSocket, Protocol protocol) {
+            mClientSocket = clientSocket;
+            mProtocol = protocol;
         }
 
         @Override
@@ -55,14 +64,22 @@ public class Server {
             System.out.println("Got a client !");
 
             try {
-                InputStream is = clientSocket.getInputStream();
-
+                BufferedReader in = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()), 2048);
+                OutputStream out = mClientSocket.getOutputStream();
+                while(!mClientSocket.isClosed()){
+                   String result = mProtocol.process(in.readLine(), mClientSocket.getInetAddress());
+                   if(result != null){
+                        out.write(result.getBytes());
+                        out.
+                    }
+                    
+                }
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             try {
-                clientSocket.close();
+                mClientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

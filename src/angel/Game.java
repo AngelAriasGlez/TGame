@@ -8,16 +8,23 @@ package angel;
 
 import java.awt.Point;
 
+interface GameListener {
+    void onMove();
+}
 
 /**
  *
  * @author aariasgonzalez
  */
 public class Game {
+    Server mServer;
+    
     public enum Player{
         EMPTY, 
         LOCAL, 
-        REMOTE_0
+        REMOTE_0,
+        REMOTE_1,
+        REMOTE_2
 
     }
     public enum Status{
@@ -25,7 +32,7 @@ public class Game {
     }
     private Player mPrevTurn = Player.REMOTE_0;
     
-    public static int LINE_ELEMENTS = 20;
+    public static int LINE_ELEMENTS = 12;
     private Box mBoxes[][] = new Box[LINE_ELEMENTS][LINE_ELEMENTS];
     
     Game(){
@@ -34,6 +41,8 @@ public class Game {
                 mBoxes[x][y] = new Box(new Point(x, y));
             }
         }
+        mServer =  new Server();
+        mServer.start(4);
     }
     public Box[][] getBoxes(){
         return mBoxes;

@@ -60,7 +60,7 @@ public class Box extends JLabel{
             g.setColor(Color.BLUE);
             g.drawLine(rect.x + thick, rect.y + thick, rect.width - thick, rect.height - thick);
             g.drawLine(rect.width - thick, rect.y + thick, rect.x + thick, rect.height - thick);
-        }/*else if(mPlayer == Player.REMOTE_1){
+        }else if(mPlayer == Player.REMOTE_1){
             g.setColor(Color.BLACK);
             g.drawRect(rect.x + thick, rect.y + thick, rect.width - (thick*2), rect.height - (thick*2));
         }else if(mPlayer == Player.REMOTE_2){
@@ -74,7 +74,7 @@ public class Box extends JLabel{
             
             g.drawPolygon(p);
 
-        }*/
+        }
         /*Polygon shape3 = new Polygon();
         shape3.addPoint(rect.x, rect.y + rect.height - 1);
         shape3.addPoint(rect.x + rect.width - 10, rect.y + rect.height - 1);
