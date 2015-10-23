@@ -47,8 +47,9 @@ public class Box extends JLabel{
 
         Rectangle rect = g.getClipBounds();
         
-        g.setColor(Color.GRAY);
-        g.drawRect(rect.x-1, rect.y, rect.width, rect.height);
+        g.setColor(Color.LIGHT_GRAY);
+        g.fillRect(rect.x+1, rect.y+1, rect.width-1, rect.height-1);
+
         
         if(mPlayer != null){
         

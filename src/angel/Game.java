@@ -24,7 +24,7 @@ interface GameListener {
 public class Game {
     Server mServer;
     Client mClient;
-    ServerProtocol mProtocol;
+
     
     ArrayList<Player> mPlayers = new ArrayList();
 
@@ -53,14 +53,10 @@ public class Game {
                 mBoxes[x][y] = new Box(new Point(x, y));
             }
         }
-        
-        mBoxes[0][0].setPlayer(new Player());
-        
 
         
-        mServer =  new Server(4, this);
-        mServer.start();
-        
+
+        startGame();
         
         mClient = new Client(this);
         try {
@@ -71,6 +67,12 @@ public class Game {
         
         
     }
+    public void startGame(){
+        mServer =  new Server(4, this);
+        mServer.start();
+    }
+    
+    
     
     public void tryMove(int x, int y){
         try {
@@ -210,6 +212,7 @@ public class Game {
         if(mPlayers.size() <= 0) return null;
         if(mPrevTurn == null) mPrevTurn = mPlayers.get(0);
         int i = mPlayers.indexOf(mPrevTurn);
+        i++;
         if(i >= mPlayers.size()) i = 0;
         if(i < 0) return null;
         return mPlayers.get(i);

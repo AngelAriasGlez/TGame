@@ -5,30 +5,30 @@
  */
 package angel;
 
-import java.net.InetAddress;
 
 /**
  *
  * @author Angel
  */
 public class Player {
+
     private static int mIdC = 0;
     private int mId;
-    InetAddress mAddress;
-    public Player(){
-        mId = 0;
-    
-    }
-    public Player(InetAddress addr){
+
+
+
+    public Player() {
         mId = mIdC;
         mIdC++;
-        mAddress = addr;
-    
+
+
     }
-    public String getAddr(){
-        return mAddress.getHostAddress();
-    }
-    public int getId(){
+
+    public int getId() {
         return mId;
     }
+
+
+
+
 }

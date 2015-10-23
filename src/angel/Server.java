@@ -17,17 +17,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
+
     private final int mMaxPlayers;
     private final Game mGame;
-    private final ServerProtocol mProtocol;
-    public Server(int maxPlayers, Game game){
+
+    public Server(int maxPlayers, Game game) {
         mMaxPlayers = maxPlayers;
         mGame = game;
-        mProtocol = new ServerProtocol(mGame);
     }
 
     public void start() {
-        
+
         final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(mMaxPlayers);
 
         Runnable serverTask = new Runnable() {
@@ -38,7 +38,7 @@ public class Server {
                     System.out.println("Waiting for clients to connect...");
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
-                        ServerPlayerTask pt = new ServerPlayerTask(clientSocket, mProtocol);
+                        ServerTask pt = new ServerTask(mGame, clientSocket);
                         clientProcessingPool.submit(pt);
                     }
                 } catch (IOException e) {
@@ -50,30 +50,32 @@ public class Server {
         serverThread.start();
     }
 
-    public class ServerPlayerTask implements Runnable {
-        private final Socket mClientSocket;
-        private final ServerProtocol mProtocol;
-        
-        Player mPlayer;
+    public class ServerTask implements Runnable {
+        Socket mSocket;
         
         BufferedReader mIn;
         OutputStream mOut;
+        Game mGame;
 
-        private ServerPlayerTask(Socket clientSocket, ServerProtocol protocol) {
-            mClientSocket = clientSocket;
-            mProtocol = protocol;
-            
-            mPlayer = new Player(mClientSocket.getInetAddress());
+        Player mPlayer;
+
+        public ServerTask(Game game, Socket clientSocket) {
+            mSocket = clientSocket;
+            mGame = game;
+
+            mPlayer = new Player();
             mGame.join(mPlayer);
-            
+
             try {
-                mIn = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()), 2048);
-                mOut = mClientSocket.getOutputStream();
+                mIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()), 2048);
+                mOut = mSocket.getOutputStream();
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
-        public void send(String out){
+
+        public void send(String out) {
             try {
                 mOut.write(out.getBytes());
             } catch (IOException ex) {
@@ -85,28 +87,38 @@ public class Server {
         public void run() {
             System.out.println("Got a client !");
 
-            
-            if(mPlayer != null && mIn != null && mOut != null){
-            
-            
             try {
-                while(!mClientSocket.isClosed()){
-                   mProtocol.process(mIn.readLine(), mPlayer, this);
+                while (!mSocket.isClosed() && mSocket.isConnected()) {
+                    String in = mIn.readLine();
+                    String cmd = in.substring(0, 3);
+                    String data = in.substring(4, in.length());
+                    switch (cmd) {
+                        case "MOV":
+                            String b[] = data.split(" ");
+                            if (b.length < 2) {
+                                return;
+                            }
+                            if (mGame.isMoveValid(Integer.parseInt(b[0]), Integer.parseInt(b[1]), mPlayer)) {
+                                if (mGame.checkForWin() != null) {
+
+                                }
+                            }
+                            break;
+
+                    }
                 }
-            
-            
+
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            }
+            mGame.mPlayers.remove(mPlayer);
 
             try {
-                mClientSocket.close();
+                mSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
 
+    }
 }
