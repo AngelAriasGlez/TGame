@@ -20,8 +20,10 @@ public class Client {
     
     }
     public void connect(String address) throws IOException{
-        mClientSocket = new ClientSocket();
-        mClientSocket.connect(address);
+        mClientSocket = new ClientSocket(address);
+        mClientSocket.start();
+        
+
 
     }
     public void move(int x, int y) throws IOException{
