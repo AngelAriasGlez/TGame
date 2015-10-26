@@ -15,7 +15,9 @@ public class Player {
     private static int mIdC = 0;
     private int mId;
 
-
+    public Player(int id) {
+        mId = id;
+    }
 
     public Player() {
         mId = mIdC;
@@ -26,6 +28,9 @@ public class Player {
 
     public int getId() {
         return mId;
+    }
+    public void setId(int id){
+        mId = id;
     }
 
 

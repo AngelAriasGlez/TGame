@@ -5,21 +5,19 @@
  */
 package angel;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JOptionPane;
 
 /**
  *
  * @author aariasgonzalez
  */
 public class Window extends javax.swing.JFrame {
-
-    private Game mGame = new Game();
     
+    private ServerGame mServer = new ServerGame();
+    private ClientGame mGame = new ClientGame();
     /**
      * Creates new form Window
      */
@@ -27,7 +25,7 @@ public class Window extends javax.swing.JFrame {
         initComponents();
     
         
-        jPanel1.setLayout(new java.awt.GridLayout(Game.LINE_ELEMENTS, Game.LINE_ELEMENTS));
+        jPanel1.setLayout(new java.awt.GridLayout(ServerGame.LINE_ELEMENTS, ServerGame.LINE_ELEMENTS));
 
         
         Box boxes[][] = mGame.getBoxes();
@@ -39,11 +37,8 @@ public class Window extends javax.swing.JFrame {
                     @Override
                     public void mouseClicked(MouseEvent me) {
                         super.mouseClicked(me);
-
-
                         Point point = b.getPosition();
                         mGame.tryMove(point.x, point.y);
-
                     }
                 });
                jPanel1.add(b);

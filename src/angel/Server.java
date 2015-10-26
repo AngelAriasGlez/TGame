@@ -24,12 +24,12 @@ import java.util.logging.Logger;
 public class Server {
 
     private final int mMaxPlayers;
-    private final Game mGame;
+    private final ServerGame mGame;
     
     private ArrayList<ServerTask> mServerTasks = new ArrayList();
 
 
-    public Server(int maxPlayers, Game game) {
+    public Server(int maxPlayers, ServerGame game) {
         mMaxPlayers = maxPlayers;
         mGame = game;
     }
@@ -46,7 +46,7 @@ public class Server {
                     System.out.println("Waiting for clients to connect...");
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
-                        ServerTask pt = new ServerTask(mGame, clientSocket);
+                        ServerTask pt = new ServerTask(Server.this, mGame, clientSocket);
                         addTask(pt);
                         clientProcessingPool.submit(pt);
                     }
@@ -64,7 +64,12 @@ public class Server {
     }
     public synchronized void broadToTasks(String msg){
         for(ServerTask t :mServerTasks){
-            
+            t.send(msg);
+        };
+    }
+    public synchronized void broadToTasksE(String msg, Player p){
+        for(ServerTask t :mServerTasks){
+            t.send(msg);
         };
     }
     
@@ -75,13 +80,15 @@ public class Server {
         BufferedReader mInBr;
         InputStream mIn;
         OutputStream mOut;
-        Game mGame;
+        ServerGame mGame;
 
         Player mPlayer;
         
         BlockingQueue<String> mToSend;
 
-        public ServerTask(Game game, Socket clientSocket) {
+        Server mServer;
+        public ServerTask(Server server, ServerGame game, Socket clientSocket) {
+            mServer = server;
             mToSend = new ArrayBlockingQueue(1024);
             
             mSocket = clientSocket;
@@ -89,6 +96,7 @@ public class Server {
 
             mPlayer = new Player();
             mGame.join(mPlayer);
+            
 
             try {
                 mIn = mSocket.getInputStream();
@@ -98,6 +106,9 @@ public class Server {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+        }
+        public Player getPlayer(){
+            return mPlayer;
         }
 
         public void send(String out) {
@@ -111,6 +122,12 @@ public class Server {
         @Override
         public void run() {
 
+            mServer.broadToTasks("SJN " + mPlayer.getId());
+            
+            for(Player p: mGame.getPlayers()){
+            
+            }
+            
             try {
                 while (!mSocket.isClosed() && mSocket.isConnected()) {
                     if(mToSend.size() > 0){
@@ -135,8 +152,10 @@ public class Server {
                                     return;
                                 }
                                 if (mGame.isMoveValid(Integer.parseInt(b[0]), Integer.parseInt(b[1]), mPlayer)) {
+                                    String msg = "SOV "+b[0]+" "+b[1]+" "+mPlayer.getId();
+                                    mServer.broadToTasks(msg);
                                     if (mGame.checkForWin() != null) {
-
+                                        mServer.broadToTasks("WIN "+mPlayer.getId());
                                     }
                                 }
                                 break;

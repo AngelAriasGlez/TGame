@@ -27,18 +27,26 @@ import java.util.logging.Logger;
  *
  * @author Angel
  */
-interface ClientSocketListener{
-    public void onData(String data);
+interface IClientSocketListener{
+    public void onDataReceived(String in);
 }
 
 public class ClientSocket extends Thread{
-
+    private IClientSocketListener mListener = null;
     
-    private final String mAddress;
+
     private BlockingQueue<String> mOutQueue = new ArrayBlockingQueue(128);
     
-    public ClientSocket(String address) {
-        mAddress = address;
+    private String mAddress  = "localhost";
+    public ClientSocket() {
+
+    }
+    
+    public void setListener(IClientSocketListener listener){
+        mListener = listener;
+    }
+    public void setAddress(String addr){
+        mAddress = addr;
     }
     
     private void connect() throws IOException, Exception{
@@ -80,6 +88,9 @@ public class ClientSocket extends Thread{
         }
         if (key.isReadable()) {
           String msg = processRead(key);
+          if(mListener != null){
+              mListener.onDataReceived(msg);
+          }
           System.out.println("[Server]: " + msg);
         }
         if (key.isWritable() && mOutQueue.size() > 0) {
@@ -123,7 +134,7 @@ public class ClientSocket extends Thread{
     }
 
     @Override
-    public void run() {
+    public void run(){
         try {
             connect();
         } catch (Exception ex) {
