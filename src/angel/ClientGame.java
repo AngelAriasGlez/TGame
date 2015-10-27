@@ -1,11 +1,10 @@
 package angel;
 
-import java.awt.Point;
 import java.io.IOException;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 
 
@@ -15,15 +14,18 @@ import java.util.logging.Logger;
  */
 public class ClientGame extends Game{
     Client mClient;
+    Window mWindow;
     
-    
-    ClientGame(){
-
+    ClientGame(Window window){
+        mWindow = window;
         mClient = new Client(this);
-        mClient.connect("localhost");
     }
-
-    
+    public void showMessage(String msg){
+        mWindow.showMessage(msg);
+    }
+    public void connect(String address){
+        mClient.connect(address);
+    }
     
     
     public void tryMove(int x, int y){
@@ -34,7 +36,8 @@ public class ClientGame extends Game{
         }
     }
     public void win(Player p){
-    
+        JOptionPane.showMessageDialog(null, "Ganador Player " + p.getId());
+        reset();
     
     }
     

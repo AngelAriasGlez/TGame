@@ -8,19 +8,30 @@ package angel;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import javax.swing.JFrame;
 
 /**
  *
  * @author aariasgonzalez
  */
 public class Game {
+    
     public static int LINE_ELEMENTS = 12;
     protected Box mBoxes[][] = new Box[LINE_ELEMENTS][LINE_ELEMENTS];
     
     protected ArrayList<Player> mPlayers = new ArrayList();
+    private boolean mStarted = false;
+    
     
     public ArrayList<Player> getPlayers(){
         return mPlayers;
+    }
+    
+    public void start(){
+        mStarted = true;
+    }
+    public boolean isStarted(){
+        return mStarted;
     }
     
     public boolean join(Player player){
@@ -41,18 +52,20 @@ public class Game {
     
     
     public Game(){
-        
         for(int x = 0; x < mBoxes.length ; x++){
             for(int y = 0; y < mBoxes[x].length ; y++){
                 mBoxes[x][y] = new Box(new Point(x, y));
             }
-        }
-    
+        }   
     }
-    
+    void reset(){
+         for(int x = 0; x < mBoxes.length ; x++){
+            for(int y = 0; y < mBoxes[x].length ; y++){
+                mBoxes[x][y].setPlayer(null);
+            }
+        }   
+    }
     public Box[][] getBoxes(){
-        
-        
         return mBoxes;
     }
 }

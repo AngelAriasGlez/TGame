@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -16,14 +17,26 @@ import java.awt.event.MouseEvent;
  */
 public class Window extends javax.swing.JFrame {
     
-    private ServerGame mServer = new ServerGame();
-    private ClientGame mGame = new ClientGame();
+    private ServerGame mServer;
+    private ClientGame mGame = new ClientGame(this);
     /**
      * Creates new form Window
      */
     public Window() {
         initComponents();
     
+int result = JOptionPane.showOptionDialog( null, 
+        "Create new game?", 
+        "Game", 
+        JOptionPane.OK_CANCEL_OPTION, 
+        JOptionPane.INFORMATION_MESSAGE, 
+        null, 
+        new String[]{"  No  ", "  Si  "}, // this is the array
+        "  No  ");
+
+        if(result == 1){
+            mServer =  new ServerGame();
+        }
         
         jPanel1.setLayout(new java.awt.GridLayout(ServerGame.LINE_ELEMENTS, ServerGame.LINE_ELEMENTS));
 
@@ -45,9 +58,14 @@ public class Window extends javax.swing.JFrame {
             }
         }
         pack();
+        
+        //mGame.connect("locahost");
     }
     
-
+    public void showMessage(String msg){
+        jLabel2.setText(msg);
+    
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -65,12 +83,12 @@ public class Window extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setPreferredSize(new java.awt.Dimension(500, 500));
-        jPanel1.setLayout(new java.awt.GridLayout());
+        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
 
         jLabel1.setText(" ");
         jLabel1.setToolTipText("");
 
-        jLabel2.setText("Player 1");
+        jLabel2.setText(" ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

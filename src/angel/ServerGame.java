@@ -35,12 +35,21 @@ public class ServerGame extends Game{
     }
 
     
-    public boolean isMoveValid(int x, int y, Player player){
-        if(getCurrentTurn() == player && mBoxes[x][y].getPlayer() == null){
-            mPrevTurn = player;
-            return true;
+    public int isMoveValid(int x, int y, Player player){
+        if(!isStarted()){
+            return -1;
         }
-        return false;
+        if(getCurrentTurn() != player){
+            return -2;
+        }
+        
+        if(mBoxes[x][y].getPlayer() == null){
+            mBoxes[x][y].setPlayer(player);
+            mPrevTurn = player;
+            return 1;
+        }else{
+            return -3;
+        }
     }
     public Player checkForWin(){
         

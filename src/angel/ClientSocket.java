@@ -89,7 +89,10 @@ public class ClientSocket extends Thread{
         if (key.isReadable()) {
           String msg = processRead(key);
           if(mListener != null){
-              mListener.onDataReceived(msg);
+              String[] lines = msg.split(System.lineSeparator());
+              for(String l : lines){
+                mListener.onDataReceived(l);
+              }
           }
           System.out.println("[Server]: " + msg);
         }
@@ -127,7 +130,7 @@ public class ClientSocket extends Thread{
     }
 
     public void send(String out) throws IOException{
-        mOutQueue.add(out + "\n");
+        mOutQueue.add(out + System.lineSeparator());
     }
     public void send(String cmd, String data) throws IOException{
         send(cmd + " " + data);

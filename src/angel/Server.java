@@ -112,6 +112,7 @@ public class Server {
         }
 
         public void send(String out) {
+            out += System.lineSeparator();
             try {
                 mOut.write(out.getBytes());
             } catch (IOException ex) {
@@ -125,11 +126,16 @@ public class Server {
             mServer.broadToTasks("SJN " + mPlayer.getId());
             
             for(Player p: mGame.getPlayers()){
-            
+                if(mPlayer.getId() == p.getId()) continue;
+                send("SJN " + p.getId());
             }
             
+            mServer.broadToTasks("SST");
+            mGame.start();
+
+            
             try {
-                while (!mSocket.isClosed() && mSocket.isConnected()) {
+                while (mSocket.isConnected()) {
                     if(mToSend.size() > 0){
                         String out = null;
                         try {
@@ -151,12 +157,21 @@ public class Server {
                                 if (b.length < 2) {
                                     return;
                                 }
-                                if (mGame.isMoveValid(Integer.parseInt(b[0]), Integer.parseInt(b[1]), mPlayer)) {
-                                    String msg = "SOV "+b[0]+" "+b[1]+" "+mPlayer.getId();
-                                    mServer.broadToTasks(msg);
+                                int result = mGame.isMoveValid(Integer.parseInt(b[0]), Integer.parseInt(b[1]), mPlayer);
+                                if (result == 1) {
+                                    mServer.broadToTasks("SMV "+b[0]+" "+b[1]+" "+mPlayer.getId());
+                                    mServer.broadToTasks("STR "+mPlayer.getId());
                                     if (mGame.checkForWin() != null) {
+                                        mGame.reset();
                                         mServer.broadToTasks("WIN "+mPlayer.getId());
+                                        
                                     }
+                                }else if(result == -1){
+                                    send("SNS");
+                                }else if(result == -2){
+                                    send("SNT");
+                                }else if(result == -3){
+                                    send("SNV");
                                 }
                                 break;
 

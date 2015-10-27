@@ -16,12 +16,27 @@ public class Client implements IClientSocketListener{
     @Override
     public void onDataReceived(String in) {
         String cmd = in.substring(0, 3);
-        String data = in.substring(4, in.length());
+        String data = "";
+        if(in.length() > 4) data = in.substring(4, in.length());
         switch (cmd) {
-            case "SJN":
-                mGame.join(new Player(Integer.parseInt(data)));
+            case "SST":
+                mGame.showMessage("Game started");
             break;
-            case "SOV":
+            case "SNS":
+                mGame.showMessage("Game not started");
+            break;
+            case "SJN":
+                Player p = new Player(Integer.parseInt(data));
+                mGame.join(p);
+                mGame.showMessage("Player "+p.getId()+" joined");
+            break;
+            case "STR":
+                mGame.showMessage("Turn player " + mGame.getPlayerById(Integer.parseInt(data)).getId());
+            break;
+            case "SNT":
+                mGame.showMessage("Not your turn");
+            break;
+            case "SMV":
                 String b[] = data.split(" ");
                 if (b.length < 2) {
                     return;
