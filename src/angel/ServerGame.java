@@ -114,7 +114,7 @@ public class ServerGame extends Game{
                 for(int l = 0; l < mBoxes.length; l++){
                     int x = (c+l);
                     int y = mBoxes.length-(z-(c+l));
-                    if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) continue;
+                    if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) break;
                     if(p == null) p = mBoxes[x][y].getPlayer();
                     if(p == mBoxes[x][y].getPlayer() && p != null){
                         p = mBoxes[x][y].getPlayer();
@@ -135,7 +135,7 @@ public class ServerGame extends Game{
                 for(int l = 0; l < mBoxes.length; l++){
                     int x = (c+l);
                     int y = (z-(c+l));
-                    if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) continue;
+                    if(x < 0 || x > mBoxes.length-1 || y < 0 || y > mBoxes.length-1) break;
                     if(p == null) p = mBoxes[x][y].getPlayer();
                     if(p == mBoxes[x][y].getPlayer() && p != null){
                         p = mBoxes[x][y].getPlayer();

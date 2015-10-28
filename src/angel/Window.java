@@ -36,7 +36,14 @@ int result = JOptionPane.showOptionDialog( null,
 
         if(result == 1){
             mServer =  new ServerGame();
+            mGame.connect("localhost");
+        }else{
+            String addr = JOptionPane.showInputDialog("Remote Address");
+            mGame.connect(addr);
         }
+        
+        
+        
         
         jPanel1.setLayout(new java.awt.GridLayout(ServerGame.LINE_ELEMENTS, ServerGame.LINE_ELEMENTS));
 
@@ -58,8 +65,6 @@ int result = JOptionPane.showOptionDialog( null,
             }
         }
         pack();
-        
-        //mGame.connect("locahost");
     }
     
     public void showMessage(String msg){
