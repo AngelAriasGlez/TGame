@@ -23,6 +23,9 @@ public class ClientGame extends Game{
     public void showMessage(String msg){
         mWindow.showMessage(msg);
     }
+    public void showPopMessage(String msg){
+        JOptionPane.showMessageDialog(mWindow, msg);
+    }
     public void connect(String address){
         mClient.connect(address);
     }

@@ -14,27 +14,39 @@ import java.io.IOException;
 public class Client implements IClientSocketListener{
 
     @Override
+    public void onDisconnect() {
+    }
+
+    @Override
+    public void onErrorToConnect() {
+    }
+    @Override
     public void onDataReceived(String in) {
         String cmd = in.substring(0, 3);
         String data = "";
         if(in.length() > 4) data = in.substring(4, in.length());
+        Player p = null;
         switch (cmd) {
             case "SST":
                 mGame.showMessage("Game started");
             break;
             case "SNS":
-                mGame.showMessage("Game not started");
+                mGame.showPopMessage("Game not started");
             break;
             case "SJN":
-                Player p = new Player(Integer.parseInt(data));
+                p = new Player(Integer.parseInt(data));
                 mGame.join(p);
                 mGame.showMessage("Player "+p.getId()+" joined");
+            break;
+            case "SLV":
+                p = new Player(Integer.parseInt(data));
+                mGame.showPopMessage("Player "+p.getId()+" leave");
             break;
             case "STR":
                 mGame.showMessage("Turn player " + mGame.getPlayerById(Integer.parseInt(data)).getId());
             break;
             case "SNT":
-                mGame.showMessage("Not your turn");
+                mGame.showPopMessage("Not your turn");
             break;
             case "SMV":
                 String b[] = data.split(" ");
@@ -59,9 +71,9 @@ public class Client implements IClientSocketListener{
     }
     public void connect(String address){
         mClientSocket = new ClientSocket();
-        mClientSocket.setAddress(address);
         mClientSocket.setListener(this);
-        mClientSocket.start();
+
+        mClientSocket.connect(address);
 
 
     }

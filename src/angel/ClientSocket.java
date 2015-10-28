@@ -8,6 +8,7 @@ package angel;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
@@ -29,15 +30,18 @@ import java.util.logging.Logger;
  */
 interface IClientSocketListener{
     public void onDataReceived(String in);
+    public void onDisconnect();
+    public void onErrorToConnect();
 }
 
 public class ClientSocket extends Thread{
     private IClientSocketListener mListener = null;
     
+    private SocketChannel mChannel;
+    private Selector mSelector;
 
     private BlockingQueue<String> mOutQueue = new ArrayBlockingQueue(128);
     
-    private String mAddress  = "localhost";
     public ClientSocket() {
 
     }
@@ -45,32 +49,27 @@ public class ClientSocket extends Thread{
     public void setListener(IClientSocketListener listener){
         mListener = listener;
     }
-    public void setAddress(String addr){
-        mAddress = addr;
-    }
+
     
-    private void connect() throws IOException, Exception{
+    public void connect(String addr){
         
-        InetAddress serverIPAddress = InetAddress.getByName(mAddress);
-        int port = 8000;
-        InetSocketAddress serverAddress = new InetSocketAddress(serverIPAddress, port);
-        Selector selector = Selector.open();
-        SocketChannel channel = SocketChannel.open();
-        channel.configureBlocking(false);
-        channel.connect(serverAddress);
-        int operations = SelectionKey.OP_CONNECT | SelectionKey.OP_READ | SelectionKey.OP_WRITE;
-        channel.register(selector, operations);
-        while (true) {
-          if (selector.select() > 0) {
-            boolean doneStatus = processReadySet(selector.selectedKeys());
-            if (doneStatus) {
-              break;
-            }
-          }
+
+        try {
+            InetAddress serverIPAddress = InetAddress.getByName(addr);
+            int port = 8000;
+            InetSocketAddress serverAddress = new InetSocketAddress(serverIPAddress, port);
+            mSelector = Selector.open();
+            mChannel = SocketChannel.open();
+            mChannel.configureBlocking(false);
+            mChannel.connect(serverAddress);
+            int operations = SelectionKey.OP_CONNECT | SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+            mChannel.register(mSelector, operations);
+            start();
+        
+        } catch (IOException ex ) {
+            Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
-        channel.close();
-        
-       
+
     
     }
     
@@ -100,9 +99,6 @@ public class ClientSocket extends Thread{
           String msg = mOutQueue.take();
           System.out.println("[Client]: " + msg);
 
-          if (msg.equalsIgnoreCase("bye")) {
-            return true; // Exit
-          }
           SocketChannel sChannel = (SocketChannel) key.channel();
           ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
           sChannel.write(buffer);
@@ -139,10 +135,22 @@ public class ClientSocket extends Thread{
     @Override
     public void run(){
         try {
-            connect();
+            while (true) {
+                    if (mSelector.select() > 0) {
+                        boolean doneStatus = processReadySet(mSelector.selectedKeys());
+                        if (doneStatus) {
+                            break;
+                        }
+                    } 
+            }
+             mChannel.close();
+        } catch (IOException ex) {
+            
+
         } catch (Exception ex) {
-            Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+        }       
+
     }
     
 }

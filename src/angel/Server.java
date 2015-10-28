@@ -5,12 +5,13 @@
  */
 package angel;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import static java.lang.System.in;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Timer;
 
 public class Server {
 
@@ -43,9 +45,11 @@ public class Server {
             public void run() {
                 try {
                     ServerSocket serverSocket = new ServerSocket(8000);
+                    
                     System.out.println("Waiting for clients to connect...");
                     while (true) {
                         Socket clientSocket = serverSocket.accept();
+                        clientSocket.setKeepAlive(true);
                         ServerTask pt = new ServerTask(Server.this, mGame, clientSocket);
                         addTask(pt);
                         clientProcessingPool.submit(pt);
@@ -113,11 +117,7 @@ public class Server {
 
         public void send(String out) {
             out += System.lineSeparator();
-            try {
-                mOut.write(out.getBytes());
-            } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            mToSend.add(out);
         }
 
         @Override
@@ -130,8 +130,21 @@ public class Server {
                 send("SJN " + p.getId());
             }
             
-            mServer.broadToTasks("SST");
-            mGame.start();
+            if(!mGame.isStarted() && mGame.getPlayers().size() >= mGame.getMinPlayers()){
+                mServer.broadToTasks("SST");
+                mGame.start();
+            }
+
+            Timer timer = new Timer (1000, new ActionListener ()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    send("SPN");
+                 }
+            });
+            timer.start();
+
+            
 
             
             try {
@@ -160,7 +173,7 @@ public class Server {
                                 int result = mGame.isMoveValid(Integer.parseInt(b[0]), Integer.parseInt(b[1]), mPlayer);
                                 if (result == 1) {
                                     mServer.broadToTasks("SMV "+b[0]+" "+b[1]+" "+mPlayer.getId());
-                                    mServer.broadToTasks("STR "+mPlayer.getId());
+                                    mServer.broadToTasks("STR "+mGame.getCurrentTurn().getId());
                                     if (mGame.checkForWin() != null) {
                                         mGame.reset();
                                         mServer.broadToTasks("WIN "+mPlayer.getId());
@@ -182,7 +195,11 @@ public class Server {
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-            mGame.mPlayers.remove(mPlayer);
+            
+            mGame.removePlayer(mPlayer);
+            mServer.broadToTasks("SLV "+mPlayer.getId());
+            mServer.broadToTasks("STR "+mGame.getCurrentTurn().getId());
+            
 
             try {
                 mSocket.close();

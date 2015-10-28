@@ -22,9 +22,14 @@ public class Game {
     protected ArrayList<Player> mPlayers = new ArrayList();
     private boolean mStarted = false;
     
+    private int nMinPlayers = 2;
+    private int nMaxPlayers = 4;
     
     public ArrayList<Player> getPlayers(){
         return mPlayers;
+    }
+    public void removePlayer(Player p){
+        mPlayers.remove(p);
     }
     
     public void start(){
@@ -33,7 +38,18 @@ public class Game {
     public boolean isStarted(){
         return mStarted;
     }
-    
+    public void setMaxPlayers(int num){
+        nMaxPlayers = num;
+    }
+    public void setMinPlayers(int num){
+        nMinPlayers = num;
+    }
+    public int getMaxPlayers(){
+        return nMaxPlayers;
+    }
+    public int getMinPlayers(){
+        return nMinPlayers;
+    }
     public boolean join(Player player){
         if(!mPlayers.contains(player)){
             mPlayers.add(player);
