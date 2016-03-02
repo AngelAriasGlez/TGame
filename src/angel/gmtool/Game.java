@@ -4,8 +4,10 @@
  * and open the template in the editor.
  */
 
-package angel;
+package angel.gmtool;
 
+import angel.Box;
+import angel.gmtool.Player;
 import java.awt.Point;
 import java.util.ArrayList;
 import javax.swing.JFrame;
@@ -16,13 +18,10 @@ import javax.swing.JFrame;
  */
 public class Game {
     
-    public static int LINE_ELEMENTS = 12;
-    protected Box mBoxes[][] = new Box[LINE_ELEMENTS][LINE_ELEMENTS];
-    
     protected ArrayList<Player> mPlayers = new ArrayList();
     private boolean mStarted = false;
     
-    private int nMinPlayers = 2;
+    private int nMinPlayers = 1;
     private int nMaxPlayers = 4;
     
     public ArrayList<Player> getPlayers(){
@@ -66,22 +65,5 @@ public class Game {
         return null;
     }
     
-    
-    public Game(){
-        for(int x = 0; x < mBoxes.length ; x++){
-            for(int y = 0; y < mBoxes[x].length ; y++){
-                mBoxes[x][y] = new Box(new Point(x, y));
-            }
-        }   
-    }
-    void reset(){
-         for(int x = 0; x < mBoxes.length ; x++){
-            for(int y = 0; y < mBoxes[x].length ; y++){
-                mBoxes[x][y].setPlayer(null);
-            }
-        }   
-    }
-    public Box[][] getBoxes(){
-        return mBoxes;
-    }
+
 }

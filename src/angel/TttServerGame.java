@@ -7,7 +7,10 @@
 package angel;
 
 
-import java.util.ArrayList;
+import angel.gmtool.Player;
+import angel.gmtool.ServerGame;
+import angel.gmtool.ServerProtocol;
+import java.awt.Point;
 
 
 
@@ -16,22 +19,41 @@ import java.util.ArrayList;
  *
  * @author aariasgonzalez
  */
-public class ServerGame extends Game{
-    Server mServer;
+public class TttServerGame extends ServerGame{
+    
 
     
     
     private Player mPrevTurn = null;
 
     
-    ServerGame(){
+    public static int LINE_ELEMENTS = 12;
+    protected Box mBoxes[][];
+    
+    public TttServerGame(ServerProtocol protocol){
+        super(protocol);
+        mBoxes = generateBoxes();
 
-        mServer =  new Server(4, this);
-        mServer.start();
-
-
-        
-        
+    }
+    void reset(){
+         for(int x = 0; x < mBoxes.length ; x++){
+            for(int y = 0; y < mBoxes[x].length ; y++){
+                mBoxes[x][y].setPlayer(null);
+            }
+        }   
+    }
+    public Box[][] getBoxes(){
+        return mBoxes;
+    }
+    
+    public static Box[][] generateBoxes(){
+        Box boxes[][] = new Box[LINE_ELEMENTS][LINE_ELEMENTS];
+            for(int x = 0; x < boxes.length ; x++){
+            for(int y = 0; y < boxes[x].length ; y++){
+                boxes[x][y] = new Box(new Point(x, y));
+            }
+        }
+            return boxes;
     }
 
     

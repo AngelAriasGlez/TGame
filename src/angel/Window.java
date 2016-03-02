@@ -5,6 +5,7 @@
  */
 package angel;
 
+import angel.gmtool.ClientProtocol;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -18,14 +19,15 @@ import javax.swing.JOptionPane;
  */
 public class Window extends javax.swing.JFrame {
     
-    private ServerGame mServer;
-    private ClientGame mGame = new ClientGame(this);
+    private TttServerGame mServer;
+    private TttClientGame mGame = new TttClientGame(this, new TttClientProtocol());
     /**
      * Creates new form Window
      */
     public Window() {
         initComponents();
     
+        
 int result = JOptionPane.showOptionDialog( null, 
         "Create new game?", 
         "Game", 
@@ -36,16 +38,16 @@ int result = JOptionPane.showOptionDialog( null,
         "  No  ");
 
         if(result == 1){
-            mServer =  new ServerGame();
+            mServer =  new TttServerGame(new TttServerProtocol());
             int n = 0;
-            while(n < mGame.getMinPlayers() ||  n > mGame.getMaxPlayers()){
+            while(n < mServer.getMinPlayers() ||  n > mServer.getMaxPlayers()){
                 String r = JOptionPane.showInputDialog("Number of players (min 2, max 4)");
                 if(r == null){
                     close();
                 }
                 n = Integer.parseInt(r);
             }
-            mGame.setMaxPlayers(n);
+            mServer.setMaxPlayers(n);
             mGame.connect("localhost");
         }else{
             String addr = JOptionPane.showInputDialog("Remote Address");
@@ -55,10 +57,9 @@ int result = JOptionPane.showOptionDialog( null,
         
         
         
-        jPanel1.setLayout(new java.awt.GridLayout(ServerGame.LINE_ELEMENTS, ServerGame.LINE_ELEMENTS));
+        jPanel1.setLayout(new java.awt.GridLayout(TttServerGame.LINE_ELEMENTS, TttServerGame.LINE_ELEMENTS));
 
         
-        Box boxes[][] = mGame.getBoxes();
         for(int x=0;x<boxes.length;x++){
             for (Box[] boxe : boxes) {
                 final Box b = boxe[x];
